@@ -52,7 +52,7 @@ class KrazyLinkButton(discord.ui.View):
         await interaction.response.send_modal(KrazyLinkModal())
 
 class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
-    roblox_link = discord.ui.TextInput(
+        roblox_link = discord.ui.TextInput(
         label="Roblox Link",
         placeholder="https://www.roblox.com/...",
         required=True
