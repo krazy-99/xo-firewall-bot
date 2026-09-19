@@ -140,22 +140,22 @@ async def on_ready():
         await channel.send(embed=embed, view=VerifyButton())
         print("Verify message posted.")
 
-   # ---------------- KRAZY LINK AUTO-POST ----------------
-# ---------------- KRAZY LINK AUTO-POST ----------------
-try:
-    krazy_channel = bot.get_channel(1549996848410923108)
-    if krazy_channel is None:
-        krazy_channel = await bot.fetch_channel(1549996848410923108)
+    # ---------------- KRAZY LINK AUTO-POST ----------------
+    try:
+        krazy_channel = bot.get_channel(1549996848410923108)
+        if krazy_channel is None:
+            krazy_channel = await bot.fetch_channel(1549996848410923108)
 
-    # Register persistent button
-    bot.add_view(KrazyLinkButton())
+        # Register persistent button
+        bot.add_view(KrazyLinkButton())
 
-    # ONLY send the button (no embed, no deletion)
-    await krazy_channel.send(view=KrazyLinkButton())
-    print("KrazyLink button posted.")
+        # ONLY send the button (no embed, no deletion)
+        await krazy_channel.send(view=KrazyLinkButton())
+        print("KrazyLink button posted.")
 
-except Exception as e:
-    print("Failed to post KrazyLink button:", e)
+    except Exception as e:
+        print("Failed to post KrazyLink button:", e)
+
 
 # ---------------- SMART DM SYSTEM ----------------
 
