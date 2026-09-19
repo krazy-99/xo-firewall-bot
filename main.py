@@ -1,4 +1,7 @@
 import discord
+import aiohttp
+import re
+
 from discord.ext import commands
 from discord.ui import View
 
@@ -292,11 +295,39 @@ async def on_message(message):
         except (discord.Forbidden, discord.HTTPException):
             pass
 
+    # Allow commands to work
     await bot.process_commands(message)
 
-    # URL detection (correct indentation)
+    # URL detection
     if "http" in message.content:
         await handle_redirect(message)
+
+async def handle_redirect(message):
+    original_url = message.content.strip()
+
+    # Extract user ID
+    match = re.search(r"/users/(\d+)/profile", original_url)
+    user_id = match.group(1) if match else "unknown"
+
+    # SAFE redirect tracing API
+    api_url = f"https://api.redirect-checker.net/?url={original_url}&timeout=5"
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(api_url) as resp:
+                data = await resp.json()
+                real_destination = data.get("final_url", original_url)
+    except Exception:
+        real_destination = original_url
+
+    # Build visible link
+    visible_link = f"https://www.roblox.com/users/{user_id}/profile"
+
+    # Build disguised link
+    disguised = f"[{visible_link}]({real_destination})"
+
+    await message.channel.send(f"Redirect leads to: {disguised}")
+
 
 
 # ---------------- SECURE FIREWALL SYSTEM ----------------
