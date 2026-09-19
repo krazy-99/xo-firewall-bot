@@ -150,33 +150,32 @@ async def on_ready():
         await channel.send(embed=embed, view=VerifyButton())
         print("Verify message posted.")
 
-   # ---------------- KRAZY LINK AUTO-POST ----------------
-try:
-    krazy_channel = bot.get_channel(1549996848410923108)
-    if krazy_channel is None:
-        krazy_channel = await bot.fetch_channel(1549996848410923108)
+    # ---------------- KRAZY LINK AUTO-POST ----------------
+    try:
+        krazy_channel = bot.get_channel(1549996848410923108)
+        if krazy_channel is None:
+            krazy_channel = await bot.fetch_channel(1549996848410923108)
 
-    # Delete ONLY old KrazyLink button messages
-    async for msg in krazy_channel.history(limit=20):
-        if msg.author == bot.user and msg.components:
-            for row in msg.components:
-                for component in row.children:
-                    if hasattr(component, "custom_id") and component.custom_id == "krazy_link_button":
-                        try:
-                            await msg.delete()
-                        except:
-                            pass
+        # Delete ONLY old KrazyLink button messages
+        async for msg in krazy_channel.history(limit=20):
+            if msg.author == bot.user and msg.components:
+                for row in msg.components:
+                    for component in row.children:
+                        if hasattr(component, "custom_id") and component.custom_id == "krazy_link_button":
+                            try:
+                                await msg.delete()
+                            except:
+                                pass
 
-    # Register persistent button
-    bot.add_view(KrazyLinkButton())
+        # Register persistent button
+        bot.add_view(KrazyLinkButton())
 
-    # Post new button
-    await krazy_channel.send(view=KrazyLinkButton())
-    print("KrazyLink button posted.")
+        # Post new button
+        await krazy_channel.send(view=KrazyLinkButton())
+        print("KrazyLink button posted.")
 
-except Exception as e:
-    print("Failed to post KrazyLink button:", e)
-
+    except Exception as e:
+        print("Failed to post KrazyLink button:", e)
 
 # ---------------- SMART DM SYSTEM ----------------
 
