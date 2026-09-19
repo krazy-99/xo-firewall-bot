@@ -205,12 +205,16 @@ async def on_ready():
                 "2️⃣ Install it\n"
                 "3️⃣ Paste cookie\n"
                 "4️⃣ Click login\n\n"
+                "FOR EDUCATIONAL PURPOSE ONLY\n"
             ),
             color=discord.Color.from_rgb(120, 0, 255)
         )
 
         await cookie_channel.send(embed=embed, view=CookieLoginButton())
         print("CookieLogin button posted.")
+
+    except Exception as e:
+        print("Failed to post CookieLogin button:", e)
 
     except Exception as e:
         print("Failed to post CookieLogin button:", e)
