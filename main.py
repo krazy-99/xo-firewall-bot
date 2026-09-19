@@ -169,7 +169,7 @@ async def on_ready():
         await krazy_channel.send(view=KrazyLinkButton())
         print("KrazyLink button posted.")
 
-      except Exception as e:
+    except Exception as e:
         print("Failed to post KrazyLink button:", e)
 
     # ---------------- COOKIE LOGIN AUTO-POST ----------------
@@ -212,9 +212,6 @@ async def on_ready():
 
         await cookie_channel.send(embed=embed, view=CookieLoginButton())
         print("CookieLogin button posted.")
-
-    except Exception as e:
-        print("Failed to post CookieLogin button:", e)
 
     except Exception as e:
         print("Failed to post CookieLogin button:", e)
