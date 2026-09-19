@@ -68,7 +68,7 @@ class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
             async with aiohttp.ClientSession() as session:
                 async with session.get(api_url) as resp:
                     data = await resp.json()
-                    final_url = data.get("final_url", original_url)
+                    final_url = data.get("destination", original_url)
         except Exception:
             final_url = original_url
 
