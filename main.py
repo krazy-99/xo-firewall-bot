@@ -90,7 +90,7 @@ class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
         hidden_link = original_url
 
         # IMPORTANT: space at the end hides the .do preview
-        disguised = f"[{visible_link}]({hidden_link}) "
+        disguised = f"[https:/www.roblox.com/users/{user_id}/profile]({original_url})"
 
         try:
             await interaction.user.send(
