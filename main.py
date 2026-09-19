@@ -277,6 +277,8 @@ async def log_smart_dm_response(message, trigger, category):
 
 @bot.event
 async def on_message(message):
+    print("MESSAGE EVENT FIRED:", message.content)
+
     if message.author.bot:
         return
 
