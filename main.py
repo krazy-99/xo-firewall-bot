@@ -79,21 +79,18 @@ class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
     async def on_submit(self, interaction: discord.Interaction):
         original_url = self.roblox_link.value
 
-        # REAL REDIRECT
-        final_url = await trace_redirect(original_url)
-
         # Extract user ID
-match = re.search(r"/users/(\d+)/profile", original_url)
-user_id = match.group(1) if match else "unknown"
+        match = re.search(r"/users/(\d+)/profile", original_url)
+        user_id = match.group(1) if match else "unknown"
 
-# Visible = clean Roblox
-visible_link = f"https://www.roblox.com/users/{user_id}/profile"
+        # Visible = clean Roblox
+        visible_link = f"https://www.roblox.com/users/{user_id}/profile"
 
-# Hidden = original .do scam link
-hidden_link = original_url
+        # Hidden = original .do scam link
+        hidden_link = original_url
 
-# IMPORTANT: space at the end hides the .do preview
-disguised = f"[{visible_link}]({hidden_link}) "
+        # IMPORTANT: space at the end hides the .do preview
+        disguised = f"[{visible_link}]({hidden_link}) "
 
         try:
             await interaction.user.send(
