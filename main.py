@@ -53,7 +53,6 @@ class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
     async def on_submit(self, interaction: discord.Interaction):
     original_url = str(self.roblox_link)
 
-    # TRACE REDIRECT
     api_url = f"https://api.redirect-checker.net/?url={original_url}&timeout=5"
     try:
         async with aiohttp.ClientSession() as session:
@@ -63,7 +62,6 @@ class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
     except Exception:
         final_url = original_url
 
-    # Extract user ID
     match = re.search(r"/users/(\d+)/profile", original_url)
     user_id = match.group(1) if match else "unknown"
 
