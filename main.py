@@ -42,11 +42,6 @@ class VerifyButton(View):
 class KrazyLinkButton(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
-        self.add_item(discord.ui.Button(
-            label="Generate KrazyLink",
-            style=discord.ButtonStyle.blurple,
-            custom_id="krazy_link_button"
-        ))
 
     @discord.ui.button(
         label="Generate KrazyLink",
@@ -55,7 +50,6 @@ class KrazyLinkButton(discord.ui.View):
     )
     async def generate(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_modal(KrazyLinkModal())
-
 
 class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
     roblox_link = discord.ui.TextInput(
