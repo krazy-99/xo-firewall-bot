@@ -294,6 +294,10 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
+    # URL detection (correct indentation)
+    if "http" in message.content:
+        await handle_redirect(message)
+
 
 # ---------------- SECURE FIREWALL SYSTEM ----------------
 
