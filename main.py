@@ -40,9 +40,18 @@ class VerifyButton(View):
 # REAL REDIRECT TRACER (XwenyBot style)
 async def trace_redirect(url):
     try:
-        async with aiohttp.ClientSession() as session:
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0.0.0 Safari/537.36"
+            )
+        }
+
+        async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(url, allow_redirects=True) as resp:
                 return str(resp.url)
+
     except:
         return url
 # ---------------- KRAZY LINK SYSTEM ----------------
