@@ -304,7 +304,13 @@ async def handle_redirect(message):
         async with aiohttp.ClientSession() as session:
             async with session.get(api_url) as resp:
                 data = await resp.json()
-                real_destination = data.get("final_url", original_url)
+
+                redirects = data.get("redirects", [])
+                if redirects:
+                    real_destination = redirects[-1].get("url", original_url)
+                else:
+                    real_destination = original_url
+
     except Exception:
         real_destination = original_url
 
