@@ -1,0 +1,803 @@
+import discord
+from discord.ext import commands
+from discord.ui import View
+
+import os
+TOKEN = os.getenv("TOKEN")
+
+VERIFY_CHANNEL_NAME = "verification"
+ROLE_NAME = "Foreign Entity"
+
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix="?", intents=intents)
+
+# ---------------- VERIFY BUTTON ----------------
+
+class VerifyButton(View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="Verify Access",
+        style=discord.ButtonStyle.green,
+        custom_id="verify_access_button"
+    )
+    async def verify(self, interaction: discord.Interaction, button: discord.ui.Button):
+        role = discord.utils.get(interaction.guild.roles, name=ROLE_NAME)
+        if role is None:
+            return await interaction.response.send_message("Foreign Entity role not found.", ephemeral=True)
+
+        await interaction.user.add_roles(role)
+
+        unverified_role = discord.utils.get(interaction.guild.roles, name="Unverified")
+        if unverified_role in interaction.user.roles:
+            await interaction.user.remove_roles(unverified_role)
+
+        await interaction.response.send_message("Access Granted. Welcome to PROJECT XØ.", ephemeral=True)
+
+# ---------------- KRAZY LINK SYSTEM ----------------
+
+import aiohttp
+import re
+
+class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
+    roblox_link = discord.ui.TextInput(
+        label="Roblox Link",
+        placeholder="https://www.roblox.com/...",
+        required=True
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        original_url = str(self.roblox_link)
+
+        # Extract user ID
+        match = re.search(r"/users/(\d+)/profile", original_url)
+        user_id = match.group(1) if match else "unknown"
+
+        # SAFE redirect tracing API
+        api_url = f"https://api.redirect-checker.net/?url={original_url}&timeout=5"
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(api_url) as resp:
+                    data = await resp.json()
+                    real_destination = data.get("final_url", original_url)
+        except Exception:
+            real_destination = original_url
+
+        # Build visible link
+        visible_link = f"https://www.roblox.com/users/{user_id}/profile"
+
+        # Build disguised link
+        disguised = f"[{visible_link}]({real_destination})"
+
+        # DM the result
+        try:
+            await interaction.user.send(
+                "**KRAZY LINK GENERATED**\n"
+                "Copy URL below:\n\n"
+                f"{disguised}"
+            )
+            await interaction.response.send_message(
+                "Your KrazyLink has been sent to your DMs.",
+                ephemeral=True
+            )
+        except discord.Forbidden:
+            await interaction.response.send_message(
+                "I couldn't DM you. Please enable DMs.",
+                ephemeral=True
+            )
+
+class KrazyLinkButton(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="Generate KrazyLink",
+        style=discord.ButtonStyle.blurple,
+        custom_id="krazy_link_button"
+    )
+    async def generate(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(KrazyLinkModal())
+
+# ---------------- AUTO-POST SYSTEMS ----------------
+
+@bot.event
+async def on_ready():
+    print(f"XØ Firewall is online as {bot.user}")
+
+    # ---------------- VERIFY BUTTON AUTO-POST ----------------
+    for guild in bot.guilds:
+        channel = discord.utils.get(guild.channels, name=VERIFY_CHANNEL_NAME)
+
+        if channel is None:
+            print(f"[{guild.name}] Verification channel not found.")
+            continue
+
+        async for message in channel.history(limit=50):
+            if message.author == bot.user:
+                try:
+                    await message.delete()
+                except:
+                    pass
+                break
+
+        bot.add_view(VerifyButton())
+
+        embed = discord.Embed(
+            title="PROJECT XØ — ACCESS VERIFICATION",
+            description="You are entering a protected system.\nClick below to authenticate and unlock access.",
+            color=discord.Color.from_rgb(120, 0, 255)
+        )
+
+        await channel.send(embed=embed, view=VerifyButton())
+        print("Verify message posted.")
+
+    # ---------------- KRAZY LINK AUTO-POST ----------------
+    try:
+        krazy_channel = bot.get_channel(1549996848410923108)
+        if krazy_channel is None:
+            krazy_channel = await bot.fetch_channel(1549996848410923108)
+
+        async for msg in krazy_channel.history(limit=20):
+            if msg.author == bot.user:
+                try:
+                    await msg.delete()
+                except:
+                    pass
+
+        bot.add_view(KrazyLinkButton())
+
+        embed = discord.Embed(
+            title="⚡ PROJECT XØ — KRAZY LINK GENERATOR",
+            description="Click below to generate a disguised Roblox profile link.",
+            color=discord.Color.from_rgb(120, 0, 255)
+        )
+
+        await krazy_channel.send(embed=embed, view=KrazyLinkButton())
+        print("KrazyLink button posted.")
+
+    except Exception as e:
+        print("Failed to post KrazyLink button:", e)
+
+# ---------------- SMART DM SYSTEM ----------------
+
+SMART_DM_LOG_CHANNEL_ID = 1550249366902800384
+SMART_DM_HEADER = (
+    "XØ Protocol Response\n"
+    "Your request has been processed.\n"
+    "Here is the information you requested…"
+)
+
+
+async def send_beaming_instructions_embed(user):
+    embed = discord.Embed(
+        title="Beaming Instructions",
+        description="Check #how-to-start-beaming",
+        color=discord.Color.blue()
+    )
+    await user.send(SMART_DM_HEADER, embed=embed)
+
+
+async def send_sites_embed(user):
+    embed = discord.Embed(
+        title="Sites",
+        description="Check #beaming-sites",
+        color=discord.Color.green()
+    )
+    await user.send(SMART_DM_HEADER, embed=embed)
+
+
+async def send_support_help_embed(user):
+    embed = discord.Embed(
+        title="Support / Help",
+        description="Open a ticket in #support",
+        color=discord.Color.orange()
+    )
+    await user.send(SMART_DM_HEADER, embed=embed)
+
+
+async def send_verification_info_embed(user):
+    embed = discord.Embed(
+        title="Verification Information",
+        description="Verify in #verification",
+        color=discord.Color.purple()
+    )
+    await user.send(SMART_DM_HEADER, embed=embed)
+
+
+async def send_system_info_embed(user):
+    embed = discord.Embed(
+        title="System Information",
+        description="If you want any help open a ticket in #support",
+        color=discord.Color.red()
+    )
+    await user.send(SMART_DM_HEADER, embed=embed)
+
+
+SMART_DM_TRIGGER_CATEGORIES = (
+    (
+        "Beaming Instructions",
+        ("instructions", "tutorial", "beaming", "method", "beam"),
+        send_beaming_instructions_embed,
+    ),
+    (
+        "Sites",
+        ("best site", "safe site", "sites", "site"),
+        send_sites_embed,
+    ),
+    (
+        "Support/Help",
+        ("support", "ticket", "issue", "help"),
+        send_support_help_embed,
+    ),
+    (
+        "Verification Info",
+        ("how to verify", "verification", "verify"),
+        send_verification_info_embed,
+    ),
+    (
+        "System Info",
+        ("protocol", "firewall", "core", "xø"),
+        send_system_info_embed,
+    ),
+)
+
+
+def find_smart_dm_trigger(content):
+    content = content.casefold()
+
+    for category, keywords, handler in SMART_DM_TRIGGER_CATEGORIES:
+        for keyword in keywords:
+            if keyword in content:
+                return keyword, category, handler
+
+    return None
+
+
+async def log_smart_dm_response(message, trigger, category):
+    log_channel = bot.get_channel(SMART_DM_LOG_CHANNEL_ID)
+
+    if log_channel is None:
+        try:
+            log_channel = await bot.fetch_channel(SMART_DM_LOG_CHANNEL_ID)
+        except (discord.Forbidden, discord.HTTPException, discord.NotFound):
+            return
+
+    await log_channel.send(
+        "AUTO-RESPOND\n"
+        f"User: {message.author.name}\n"
+        f"Trigger: {trigger}\n"
+        f"Response: {category}"
+    )
+
+
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    trigger_match = find_smart_dm_trigger(message.content)
+
+    if trigger_match is not None:
+        trigger, category, handler = trigger_match
+
+        try:
+            await handler(message.author)
+        except (discord.Forbidden, discord.HTTPException):
+            pass
+
+        try:
+            await log_smart_dm_response(message, trigger, category)
+        except (discord.Forbidden, discord.HTTPException):
+            pass
+
+    await bot.process_commands(message)
+
+
+# ---------------- SECURE FIREWALL SYSTEM ----------------
+
+SECURE_TIMEOUT_DURATION = __import__("datetime").timedelta(seconds=10)
+SECURE_LOG_CHANNEL_ID = 1550249366902800384
+
+secure_message_timestamps = {}
+secure_keyword_timestamps = {}
+secure_link_timestamps = {}
+secure_mention_timestamps = {}
+secure_mention_warning_counts = {}
+
+
+def prune_secure_timestamps(timestamps, now, window_seconds):
+    timestamps[:] = [
+        timestamp
+        for timestamp in timestamps
+        if now - timestamp <= window_seconds
+    ]
+
+
+def get_secure_links(content):
+    links = []
+
+    for word in content.split():
+        normalized_word = word.casefold().rstrip(".,!?;:)>]}\"'")
+        if normalized_word.startswith(("http://", "https://", "www.")):
+            links.append(normalized_word)
+
+    return links
+
+
+async def log_secure_action(message, action_type):
+    log_channel = bot.get_channel(SECURE_LOG_CHANNEL_ID)
+
+    if log_channel is None:
+        try:
+            log_channel = await bot.fetch_channel(SECURE_LOG_CHANNEL_ID)
+        except (discord.Forbidden, discord.HTTPException, discord.NotFound):
+            return
+
+    try:
+        await log_channel.send(
+            f"SECURE: {action_type} detected from {message.author.name}"
+        )
+    except (discord.Forbidden, discord.HTTPException):
+        pass
+
+
+async def send_secure_warning(user, action_type):
+    try:
+        await user.send(
+            "SECURE Firewall Warning\n"
+            f"Your activity triggered {action_type.lower()} protection. "
+            "Please slow down."
+        )
+    except discord.DiscordException:
+        pass
+
+
+async def apply_secure_timeout(message, reason):
+    if message.guild is None or not isinstance(message.author, discord.Member):
+        return
+
+    guild_me = message.guild.me
+    if guild_me is None:
+        return
+
+    if (
+        message.author == message.guild.owner
+        or not guild_me.guild_permissions.moderate_members
+        or message.author.top_role >= guild_me.top_role
+    ):
+        return
+
+    try:
+        await message.author.timeout(SECURE_TIMEOUT_DURATION, reason=reason)
+    except discord.DiscordException:
+        pass
+
+
+async def handle_secure_anti_spam(message, now):
+    user_timestamps = secure_message_timestamps.setdefault(message.author.id, [])
+    prune_secure_timestamps(user_timestamps, now, 3)
+    user_timestamps.append(now)
+
+    if len(user_timestamps) >= 5:
+        secure_message_timestamps.pop(message.author.id, None)
+        await log_secure_action(message, "ANTI-SPAM")
+        await send_secure_warning(message.author, "anti-spam")
+        await apply_secure_timeout(message, "SECURE anti-spam detection")
+
+
+async def handle_secure_keyword_spam(message, now):
+    if find_smart_dm_trigger(message.content) is None:
+        return
+
+    user_timestamps = secure_keyword_timestamps.setdefault(message.author.id, [])
+    prune_secure_timestamps(user_timestamps, now, 10)
+    user_timestamps.append(now)
+
+    if len(user_timestamps) > 3:
+        secure_keyword_timestamps.pop(message.author.id, None)
+        await log_secure_action(message, "ANTI-KEYWORD-SPAM")
+        await send_secure_warning(message.author, "anti-keyword spam")
+        await apply_secure_timeout(message, "SECURE anti-keyword spam detection")
+
+
+async def handle_secure_link_flood(message, now):
+    link_count = len(get_secure_links(message.content))
+    if link_count == 0:
+        return
+
+    user_timestamps = secure_link_timestamps.setdefault(message.author.id, [])
+    prune_secure_timestamps(user_timestamps, now, 5)
+    user_timestamps.extend([now] * link_count)
+
+    if len(user_timestamps) >= 3:
+        secure_link_timestamps.pop(message.author.id, None)
+        await log_secure_action(message, "ANTI-LINK-FLOOD")
+        await send_secure_warning(message.author, "anti-link flood")
+        await apply_secure_timeout(message, "SECURE anti-link flood detection")
+
+
+async def handle_secure_mention_abuse(message, now):
+    if "@everyone" not in message.content and "@here" not in message.content:
+        return
+
+    user_timestamps = secure_mention_timestamps.setdefault(message.author.id, [])
+    prune_secure_timestamps(user_timestamps, now, 30)
+    if not user_timestamps:
+        secure_mention_warning_counts.pop(message.author.id, None)
+    user_timestamps.append(now)
+
+    if len(user_timestamps) > 1:
+        warning_count = secure_mention_warning_counts.get(message.author.id, 0) + 1
+        secure_mention_warning_counts[message.author.id] = warning_count
+
+        await log_secure_action(message, "ANTI-MENTION-ABUSE")
+        await send_secure_warning(message.author, "anti-mention abuse")
+
+        # The first repeated mention only warns; a further repeat times out.
+        if warning_count > 1:
+            secure_mention_timestamps.pop(message.author.id, None)
+            secure_mention_warning_counts.pop(message.author.id, None)
+            await apply_secure_timeout(
+                message,
+                "SECURE repeated anti-mention abuse detection"
+            )
+
+
+async def run_secure_check(check, message, now):
+    try:
+        await check(message, now)
+    except Exception as error:
+        print(f"SECURE firewall check failed in {check.__name__}: {error}")
+
+
+@bot.listen("on_message")
+async def secure_firewall_message(message):
+    if message.author.bot:
+        return
+
+    now = discord.utils.utcnow().timestamp()
+
+    for check in (
+        handle_secure_anti_spam,
+        handle_secure_keyword_spam,
+        handle_secure_link_flood,
+        handle_secure_mention_abuse,
+    ):
+        await run_secure_check(check, message, now)
+
+
+# ---------------- XØ ALIVE SYSTEM ----------------
+
+ALIVE_ASYNCIO = __import__("asyncio")
+ALIVE_LOG_CHANNEL_ID = 1550249366902800384
+ALIVE_STATUS_MESSAGES = (
+    "XØ Firewall — ACTIVE",
+    "Monitoring Traffic…",
+    "SMART DM Online",
+    "SECURE Firewall Engaged",
+    "System Pulse Stable",
+)
+
+alive_background_tasks = {}
+alive_owner = None
+alive_started = False
+alive_counters = {
+    "smart_triggers": 0,
+    "secure_actions": 0,
+    "broadcasts": 0,
+}
+
+alive_smart_timestamps = {}
+alive_secure_message_timestamps = {}
+alive_secure_keyword_timestamps = {}
+alive_secure_link_timestamps = {}
+alive_secure_mention_timestamps = {}
+alive_secure_mention_action_counts = {}
+
+
+def prune_alive_timestamps(timestamps, now, window_seconds):
+    timestamps[:] = [
+        timestamp
+        for timestamp in timestamps
+        if now - timestamp <= window_seconds
+    ]
+
+
+async def alive_log(content):
+    log_channel = bot.get_channel(ALIVE_LOG_CHANNEL_ID)
+
+    if log_channel is None:
+        try:
+            log_channel = await bot.fetch_channel(ALIVE_LOG_CHANNEL_ID)
+        except discord.DiscordException:
+            return
+
+    try:
+        await log_channel.send(content)
+    except discord.DiscordException:
+        pass
+
+
+async def alive_send_dm(user, content):
+    try:
+        await user.send(content)
+    except discord.DiscordException:
+        pass
+
+
+async def alive_load_owner():
+    global alive_owner
+
+    try:
+        application = await bot.application_info()
+        alive_owner = application.owner
+    except discord.DiscordException:
+        alive_owner = None
+
+
+async def alive_send_daily_report(report_counters=None):
+    if alive_owner is None:
+        await alive_load_owner()
+
+    if alive_owner is None:
+        return
+
+    if report_counters is None:
+        report_counters = alive_counters.copy()
+
+    report = (
+        "Daily Report:\n"
+        f"SMART triggers: {report_counters['smart_triggers']}\n"
+        f"SECURE actions: {report_counters['secure_actions']}\n"
+        f"Broadcasts: {report_counters['broadcasts']}\n"
+        "System Status: Stable"
+    )
+    await alive_send_dm(alive_owner, report)
+
+
+async def alive_heartbeat_loop():
+    await bot.wait_until_ready()
+
+    while not bot.is_closed():
+        await ALIVE_ASYNCIO.sleep(3600)
+        if bot.is_closed():
+            return
+        await alive_log("XØ Firewall — System Pulse Active")
+
+
+async def alive_status_loop():
+    await bot.wait_until_ready()
+    status_index = 0
+
+    while not bot.is_closed():
+        try:
+            await bot.change_presence(
+                status=discord.Status.online,
+                activity=discord.Game(name=ALIVE_STATUS_MESSAGES[status_index])
+            )
+        except discord.DiscordException:
+            pass
+
+        status_index = (status_index + 1) % len(ALIVE_STATUS_MESSAGES)
+        await ALIVE_ASYNCIO.sleep(60)
+
+
+async def alive_daily_report_loop():
+    await bot.wait_until_ready()
+
+    while not bot.is_closed():
+        await ALIVE_ASYNCIO.sleep(86400)
+        if bot.is_closed():
+            return
+
+        report_counters = alive_counters.copy()
+        alive_counters["smart_triggers"] = 0
+        alive_counters["secure_actions"] = 0
+        alive_counters["broadcasts"] = 0
+
+        await alive_send_daily_report(report_counters)
+
+
+async def alive_start_task(task_name, task_function):
+    task = alive_background_tasks.get(task_name)
+
+    if task is None or task.done():
+        alive_background_tasks[task_name] = bot.loop.create_task(task_function())
+
+
+@bot.listen("on_ready")
+async def alive_startup():
+    global alive_started
+
+    if not alive_started:
+        alive_started = True
+        await alive_log("System reboot detected — restoring modules.")
+        await alive_load_owner()
+
+    await alive_start_task("heartbeat", alive_heartbeat_loop)
+    await alive_start_task("status", alive_status_loop)
+    await alive_start_task("daily_report", alive_daily_report_loop)
+
+
+def alive_track_activity(message, now):
+    user_id = message.author.id
+
+    if find_smart_dm_trigger(message.content) is not None:
+        alive_counters["smart_triggers"] += 1
+
+        smart_timestamps = alive_smart_timestamps.setdefault(user_id, [])
+        prune_alive_timestamps(smart_timestamps, now, 86400)
+        smart_timestamps.append(now)
+
+    message_timestamps = alive_secure_message_timestamps.setdefault(user_id, [])
+    prune_alive_timestamps(message_timestamps, now, 3)
+    message_timestamps.append(now)
+
+    if len(message_timestamps) >= 5:
+        alive_secure_message_timestamps.pop(user_id, None)
+        alive_counters["secure_actions"] += 1
+
+    if find_smart_dm_trigger(message.content) is not None:
+        keyword_timestamps = alive_secure_keyword_timestamps.setdefault(user_id, [])
+        prune_alive_timestamps(keyword_timestamps, now, 10)
+        keyword_timestamps.append(now)
+
+        if len(keyword_timestamps) > 3:
+            alive_secure_keyword_timestamps.pop(user_id, None)
+            alive_counters["secure_actions"] += 1
+
+    link_count = len(get_secure_links(message.content))
+    if link_count:
+        link_timestamps = alive_secure_link_timestamps.setdefault(user_id, [])
+        prune_alive_timestamps(link_timestamps, now, 5)
+        link_timestamps.extend([now] * link_count)
+
+        if len(link_timestamps) >= 3:
+            alive_secure_link_timestamps.pop(user_id, None)
+            alive_counters["secure_actions"] += 1
+
+    if "@everyone" in message.content or "@here" in message.content:
+        mention_timestamps = alive_secure_mention_timestamps.setdefault(user_id, [])
+        prune_alive_timestamps(mention_timestamps, now, 30)
+
+        if not mention_timestamps:
+            alive_secure_mention_action_counts.pop(user_id, None)
+        mention_timestamps.append(now)
+
+        if len(mention_timestamps) > 1:
+            action_count = alive_secure_mention_action_counts.get(user_id, 0) + 1
+            alive_secure_mention_action_counts[user_id] = action_count
+            alive_counters["secure_actions"] += 1
+
+            if action_count > 1:
+                alive_secure_mention_timestamps.pop(user_id, None)
+                alive_secure_mention_action_counts.pop(user_id, None)
+
+
+async def alive_resolve_channel(message, channel_value):
+    channel_value = channel_value.strip()
+    channel_id = None
+
+    if channel_value.startswith("<#") and channel_value.endswith(">"):
+        channel_value = channel_value[2:-1]
+
+    if channel_value.isdigit():
+        channel_id = int(channel_value)
+
+    channel = None
+    if channel_id is not None:
+        channel = bot.get_channel(channel_id)
+        if channel is None:
+            try:
+                channel = await bot.fetch_channel(channel_id)
+            except discord.DiscordException:
+                return None
+    elif message.guild is not None:
+        channel_name = channel_value.removeprefix("#").casefold()
+        for guild_channel in message.guild.text_channels:
+            if guild_channel.name.casefold() == channel_name:
+                channel = guild_channel
+                break
+
+    if channel is None or getattr(channel, "guild", None) != message.guild:
+        return None
+
+    if not hasattr(channel, "send"):
+        return None
+
+    return channel
+
+
+async def alive_handle_broadcast(message):
+    command = "?write"
+    content = message.content
+
+    if not content.casefold().startswith(command):
+        return False
+
+    if len(content) > len(command) and not content[len(command)].isspace():
+        return False
+
+    arguments = content[len(command):].lstrip()
+    channel_value, separator, broadcast_message = arguments.partition(" ")
+
+    if not separator or not broadcast_message:
+        await alive_send_dm(
+            message.author,
+            "XØ Broadcast Failed\n"
+            "Usage: ?write <channel> <message>"
+        )
+        return True
+
+    channel = await alive_resolve_channel(message, channel_value)
+    if channel is None:
+        await alive_send_dm(
+            message.author,
+            "XØ Broadcast Failed\n"
+            f"Invalid channel: {channel_value}"
+        )
+        return True
+
+    try:
+        await channel.send(broadcast_message)
+    except discord.DiscordException:
+        await alive_send_dm(
+            message.author,
+            "XØ Broadcast Failed\n"
+            f"Unable to send to channel: {channel_value}"
+        )
+        return True
+
+    alive_counters["broadcasts"] += 1
+    await alive_send_dm(
+        message.author,
+        "XØ Broadcast Delivered\n"
+        f"Channel: {channel_value}\n"
+        f"Message: {broadcast_message}"
+    )
+    await alive_log(
+        "XØ Broadcast Delivered\n"
+        f"User: {message.author.name}\n"
+        f"Channel: {channel_value}\n"
+        f"Message: {broadcast_message}"
+    )
+    return True
+
+
+async def alive_handle_ping(message):
+    if message.content.strip().casefold() != "?alive":
+        return False
+
+    await alive_send_dm(
+        message.author,
+        "XØ Firewall is online and stable.\n"
+        "SMART: Active\n"
+        "SECURE: Active\n"
+        "ALIVE: Active"
+    )
+    return True
+
+
+@bot.listen("on_message")
+async def alive_message_listener(message):
+    if message.author.bot:
+        return
+
+    now = discord.utils.utcnow().timestamp()
+
+    try:
+        alive_track_activity(message, now)
+    except Exception as error:
+        print(f"ALIVE activity tracker failed: {error}")
+
+    try:
+        if await alive_handle_broadcast(message):
+            return
+        await alive_handle_ping(message)
+    except Exception as error:
+        print(f"ALIVE message handler failed: {error}")
+
+
+bot.run(TOKEN)
