@@ -140,8 +140,8 @@ async def on_ready():
         await channel.send(embed=embed, view=VerifyButton())
         print("Verify message posted.")
 
-    # ---------------- KRAZY LINK AUTO-POST ----------------
    # ---------------- KRAZY LINK AUTO-POST ----------------
+# ---------------- KRAZY LINK AUTO-POST ----------------
 try:
     krazy_channel = bot.get_channel(1549996848410923108)
     if krazy_channel is None:
