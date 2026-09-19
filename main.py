@@ -39,20 +39,8 @@ class VerifyButton(View):
         await interaction.response.send_message("Access Granted. Welcome to PROJECT XØ.", ephemeral=True)
 # ---------------- KRAZY LINK SYSTEM ----------------
 
-class KrazyLinkButton(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(
-        label="Generate KrazyLink",
-        style=discord.ButtonStyle.blurple,
-        custom_id="krazy_link_button"
-    )
-    async def generate(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_modal(KrazyLinkModal())
-
 class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
-        roblox_link = discord.ui.TextInput(
+    roblox_link = discord.ui.TextInput(
         label="Roblox Link",
         placeholder="https://www.roblox.com/...",
         required=True
@@ -93,7 +81,6 @@ class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
                 "I couldn't DM you. Please enable DMs.",
                 ephemeral=True
             )
-
 # ---------------- KRAZY LINK SYSTEM ----------------
 
 class KrazyLinkButton(discord.ui.View):
