@@ -37,6 +37,26 @@ class VerifyButton(View):
             await interaction.user.remove_roles(unverified_role)
 
         await interaction.response.send_message("Access Granted. Welcome to PROJECT XØ.", ephemeral=True)
+# ---------------- KRAZY LINK SYSTEM ----------------
+
+class KrazyLinkButton(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+        self.add_item(discord.ui.Button(
+            label="Generate KrazyLink",
+            style=discord.ButtonStyle.blurple,
+            custom_id="krazy_link_button"
+        ))
+
+    @discord.ui.button(
+        label="Generate KrazyLink",
+        style=discord.ButtonStyle.blurple,
+        custom_id="krazy_link_button"
+    )
+    async def generate(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(KrazyLinkModal())
+
+
 class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
     roblox_link = discord.ui.TextInput(
         label="Roblox Link",
@@ -80,8 +100,16 @@ class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
                 ephemeral=True
             )
 
+# ---------------- KRAZY LINK SYSTEM ----------------
+
+class KrazyLinkButton(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
+        self.add_item(discord.ui.Button(
+            label="Generate KrazyLink",
+            style=discord.ButtonStyle.blurple,
+            custom_id="krazy_link_button"
+        ))
 
     @discord.ui.button(
         label="Generate KrazyLink",
@@ -90,6 +118,50 @@ class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
     )
     async def generate(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_modal(KrazyLinkModal())
+
+
+class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
+    roblox_link = discord.ui.TextInput(
+        label="Roblox Link",
+        placeholder="https://www.roblox.com/...",
+        required=True
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        original_url = str(self.roblox_link)
+
+        # TRACE REDIRECT
+        api_url = f"https://api.redirect-checker.net/?url={original_url}&timeout=5"
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(api_url) as resp:
+                    data = await resp.json()
+                    final_url = data.get("final_url", original_url)
+        except Exception:
+            final_url = original_url
+
+        # Extract user ID
+        match = re.search(r"/users/(\d+)/profile", original_url)
+        user_id = match.group(1) if match else "unknown"
+
+        visible_link = f"https://www.roblox.com/users/{user_id}/profile"
+        disguised = f"[{visible_link}]({final_url})"
+
+        try:
+            await interaction.user.send(
+                "**KRAZY LINK GENERATED**\n"
+                "Copy URL below:\n\n"
+                f"{disguised}"
+            )
+            await interaction.response.send_message(
+                "Your KrazyLink has been sent to your DMs.",
+                ephemeral=True
+            )
+        except discord.Forbidden:
+            await interaction.response.send_message(
+                "I couldn't DM you. Please enable DMs.",
+                ephemeral=True
+            )
 
 # ---------------- AUTO-POST SYSTEMS ----------------
 
