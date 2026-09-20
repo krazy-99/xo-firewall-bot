@@ -178,7 +178,7 @@ async def on_ready():
     except Exception as e:
         print("Failed to post KrazyLink button:", e)
 
-    # ---------------- COOKIE LOGIN AUTO-POST ----------------
+        # ---------------- COOKIE LOGIN AUTO-POST ----------------
     try:
         cookie_channel = bot.get_channel(1550957283599589447)
         if cookie_channel is None:
@@ -196,27 +196,8 @@ async def on_ready():
 
         bot.add_view(CookieLoginButton())
 
-        embed = discord.Embed(
-            title="COOKIE LOGIN TUTORIAL",
-            description=(
-                "💧 Login with cookies — fast, safe & easy 💧\n\n"
-                "⭐ 100% SAFE\n"
-                "Checked through VirusTotal — no viruses.\n\n"
-                "⚡ INSTANT LOGIN\n"
-                "Paste cookie → click login → you're in.\n\n"
-                "👥 MULTI‑ACCOUNT SUPPORT\n"
-                "Store multiple cookies and switch instantly.\n\n"
-                "📘 HOW TO USE\n"
-                "1️⃣ Download extension\n"
-                "2️⃣ Install it\n"
-                "3️⃣ Paste cookie\n"
-                "4️⃣ Click login\n\n"
-                "FOR EDUCATIONAL PURPOSE ONLY\n"
-            ),
-            color=discord.Color.from_rgb(120, 0, 255)
-        )
-
-        await cookie_channel.send(embed=embed, view=CookieLoginButton())
+        # BUTTON ONLY — NO EMBED
+        await cookie_channel.send(view=CookieLoginButton())
         print("CookieLogin button posted.")
 
     except Exception as e:
