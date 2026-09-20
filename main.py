@@ -222,6 +222,18 @@ async def on_ready():
     except Exception as e:
         print("Failed to post CookieLogin button:", e)
 
+    # ---------------- ALIVE STARTUP ----------------
+    global alive_started
+
+    if not alive_started:
+        alive_started = True
+        await alive_log("System reboot detected — restoring modules.")
+        await alive_load_owner()
+
+    await alive_start_task("heartbeat", alive_heartbeat_loop)
+    await alive_start_task("status", alive_status_loop)
+    await alive_start_task("daily_report", alive_daily_report_loop)
+
 # ---------------- SMART DM SYSTEM ----------------
 
 SMART_DM_LOG_CHANNEL_ID = 1550249366902800384
@@ -688,19 +700,6 @@ async def alive_start_task(task_name, task_function):
     if task is None or task.done():
         alive_background_tasks[task_name] = bot.loop.create_task(task_function())
 
-
-@bot.listen("on_ready")
-async def alive_startup():
-    global alive_started
-
-    if not alive_started:
-        alive_started = True
-        await alive_log("System reboot detected — restoring modules.")
-        await alive_load_owner()
-
-    await alive_start_task("heartbeat", alive_heartbeat_loop)
-    await alive_start_task("status", alive_status_loop)
-    await alive_start_task("daily_report", alive_daily_report_loop)
 
 
 def alive_track_activity(message, now):
