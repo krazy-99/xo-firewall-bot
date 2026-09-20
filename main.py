@@ -117,8 +117,7 @@ class CookieLoginButton(discord.ui.View):
         self.add_item(discord.ui.Button(
             label="Cookie Login",
             url="https://tinyurl.com/cookie-login",
-            style=discord.ButtonStyle.link,
-            custom_id="cookie_login_button"
+            style=discord.ButtonStyle.link
         ))
 
 
@@ -188,7 +187,7 @@ async def on_ready():
             if msg.author == bot.user and msg.components:
                 for row in msg.components:
                     for component in row.children:
-                        if hasattr(component, "custom_id") and component.custom_id == "cookie_login_button":
+                        if component.style == discord.ButtonStyle.link:
                             try:
                                 await msg.delete()
                             except:
