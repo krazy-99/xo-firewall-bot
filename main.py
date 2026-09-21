@@ -245,6 +245,70 @@ async def on_ready():
     await alive_start_task("heartbeat", alive_heartbeat_loop)
     await alive_start_task("status", alive_status_loop)
     await alive_start_task("daily_report", alive_daily_report_loop)
+
+# ============================
+# XØ MODERATION SYSTEM
+# ============================
+
+@bot.command()
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, member: discord.Member, *, reason="No reason provided"):
+    await ctx.message.delete()
+    try:
+        await member.kick(reason=reason)
+        await ctx.author.send(f"XØ MODERATION: {member} was kicked.\nReason: {reason}")
+        log_channel = bot.get_channel(1550249366902800384)
+        await log_channel.send(f"MODERATION: {member} kicked by {ctx.author}. Reason: {reason}")
+    except Exception as e:
+        await ctx.author.send(f"Kick failed: {e}")
+
+@bot.command()
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member: discord.Member, *, reason="No reason provided"):
+    await ctx.message.delete()
+    try:
+        await member.ban(reason=reason)
+        await ctx.author.send(f"XØ MODERATION: {member} was banned.\nReason: {reason}")
+        log_channel = bot.get_channel(1550249366902800384)
+        await log_channel.send(f"MODERATION: {member} banned by {ctx.author}. Reason: {reason}")
+    except Exception as e:
+        await ctx.author.send(f"Ban failed: {e}")
+
+@bot.command()
+@commands.has_permissions(moderate_members=True)
+async def timeout(ctx, member: discord.Member, seconds: int, *, reason="No reason provided"):
+    await ctx.message.delete()
+    try:
+        duration = discord.utils.utcnow() + datetime.timedelta(seconds=seconds)
+        await member.timeout(duration, reason=reason)
+        await ctx.author.send(f"XØ MODERATION: {member} timed out for {seconds} seconds.\nReason: {reason}")
+        log_channel = bot.get_channel(1550249366902800384)
+        await log_channel.send(f"MODERATION: {member} timeout by {ctx.author}. Duration: {seconds}s. Reason: {reason}")
+    except Exception as e:
+        await ctx.author.send(f"Timeout failed: {e}")
+
+@bot.command()
+async def warn(ctx, member: discord.Member, *, reason="No reason provided"):
+    await ctx.message.delete()
+    try:
+        await member.send(f"⚠️ WARNING from XØ Firewall:\nReason: {reason}")
+        await ctx.author.send(f"Warned {member}.")
+        log_channel = bot.get_channel(1550249366902800384)
+        await log_channel.send(f"MODERATION: {member} warned by {ctx.author}. Reason: {reason}")
+    except Exception as e:
+        await ctx.author.send(f"Warn failed: {e}")
+
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def purge(ctx, amount: int):
+    await ctx.message.delete()
+    try:
+        await ctx.channel.purge(limit=amount)
+        await ctx.author.send(f"Purged {amount} messages in #{ctx.channel.name}.")
+        log_channel = bot.get_channel(1550249366902800384)
+        await log_channel.send(f"MODERATION: {amount} messages purged by {ctx.author} in #{ctx.channel.name}.")
+    except Exception as e:
+        await ctx.author.send(f"Purge failed: {e}")
 # ---------------- SMART DM SYSTEM ----------------
 
 SMART_DM_LOG_CHANNEL_ID = 1550249366902800384
