@@ -264,6 +264,11 @@ def get_log_channel():
 async def kick(ctx, member: discord.Member, *, reason="No reason provided"):
     await ctx.message.delete()
     try:
+        try:
+            await member.send(f"You have been kicked from {ctx.guild.name}.\nReason: {reason}")
+        except:
+            pass
+
         await member.kick(reason=reason)
         await ctx.author.send(f"XØ MODERATION: {member} was kicked.\nReason: {reason}")
         await get_log_channel().send(f"MODERATION: {member} kicked by {ctx.author}. Reason: {reason}")
@@ -278,6 +283,11 @@ async def kick(ctx, member: discord.Member, *, reason="No reason provided"):
 async def ban(ctx, member: discord.Member, *, reason="No reason provided"):
     await ctx.message.delete()
     try:
+        try:
+            await member.send(f"You have been banned from {ctx.guild.name}.\nReason: {reason}")
+        except:
+            pass
+
         await member.ban(reason=reason)
         await ctx.author.send(f"XØ MODERATION: {member} was banned.\nReason: {reason}")
         await get_log_channel().send(f"MODERATION: {member} banned by {ctx.author}. Reason: {reason}")
@@ -313,6 +323,12 @@ async def timeout(ctx, member: discord.Member, seconds: int, *, reason="No reaso
     await ctx.message.delete()
     try:
         until = discord.utils.utcnow() + datetime.timedelta(seconds=seconds)
+
+        try:
+            await member.send(f"You have been timed out for {seconds} seconds.\nReason: {reason}")
+        except:
+            pass
+
         await member.timeout(until, reason=reason)
         await ctx.author.send(f"XØ MODERATION: {member} timed out for {seconds} seconds.\nReason: {reason}")
         await get_log_channel().send(f"MODERATION: {member} timeout by {ctx.author}. Duration: {seconds}s. Reason: {reason}")
@@ -368,6 +384,11 @@ async def purge(ctx, amount: int):
 async def mute(ctx, member: discord.Member, *, reason="No reason provided"):
     await ctx.message.delete()
     try:
+        try:
+            await member.send(f"You have been muted.\nReason: {reason}")
+        except:
+            pass
+
         mute_role = discord.utils.get(ctx.guild.roles, name="Muted")
         if not mute_role:
             mute_role = await ctx.guild.create_role(name="Muted")
@@ -406,6 +427,11 @@ async def unmute(ctx, member: discord.Member):
 async def softban(ctx, member: discord.Member, *, reason="No reason provided"):
     await ctx.message.delete()
     try:
+        try:
+            await member.send(f"You have been softbanned (messages cleared).\nReason: {reason}")
+        except:
+            pass
+
         await member.ban(reason=reason)
         await ctx.guild.unban(member)
         await ctx.author.send(f"Softbanned {member}. Reason: {reason}")
