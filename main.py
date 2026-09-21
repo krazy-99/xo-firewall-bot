@@ -284,16 +284,14 @@ async def ban(ctx, member: discord.Member, *, reason="No reason provided"):
         await ctx.author.send(f"Ban failed: {e}")
 
 # ----------------------------
-# UNBAN (username only)
+# UNBAN (username only, async generator safe)
 # ----------------------------
 @bot.command()
 @commands.has_permissions(ban_members=True)
 async def unban(ctx, username: str, *, reason="No reason provided"):
     await ctx.message.delete()
     try:
-        banned_users = await ctx.guild.bans()
-
-        for ban_entry in banned_users:
+        async for ban_entry in ctx.guild.bans():
             if ban_entry.user.name.lower() == username.lower():
                 await ctx.guild.unban(ban_entry.user, reason=reason)
                 await ctx.author.send(f"XØ MODERATION: Unbanned {username}.\nReason: {reason}")
