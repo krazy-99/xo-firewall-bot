@@ -189,7 +189,7 @@ async def on_ready():
     except Exception as e:
         print("Failed to post KrazyLink button:", e)
 
-        # ---------------- COOKIE LOGIN AUTO-POST ----------------
+    # ---------------- COOKIE LOGIN AUTO-POST ----------------
     try:
         cookie_channel = bot.get_channel(1550957283599589447)
         if cookie_channel is None:
@@ -207,37 +207,35 @@ async def on_ready():
 
         bot.add_view(CookieLoginButton())
 
-        # BUTTON ONLY — NO EMBED
         await cookie_channel.send(view=CookieLoginButton())
         print("CookieLogin button posted.")
 
     except Exception as e:
         print("Failed to post CookieLogin button:", e)
 
- # ---------------- COOKIE REFRESHER AUTO-POST ----------------
-try:
-    refresher_thread = bot.get_channel(1551410283535270018)
-    if refresher_thread is None:
-        refresher_thread = await bot.fetch_channel(1551410283535270018)
+    # ---------------- COOKIE REFRESHER AUTO-POST ----------------
+    try:
+        refresher_thread = bot.get_channel(1551410283535270018)
+        if refresher_thread is None:
+            refresher_thread = await bot.fetch_channel(1551410283535270018)
 
-    # Delete ONLY old CookieRefresher button messages
-    async for msg in refresher_thread.history(limit=20):
-        if msg.author == bot.user and msg.components:
-            for row in msg.components:
-                for component in row.children:
-                    if hasattr(component, "custom_id") and component.custom_id == "cookie_refresher_button":
-                        try:
-                            await msg.delete()
-                        except:
-                            pass
+        async for msg in refresher_thread.history(limit=20):
+            if msg.author == bot.user and msg.components:
+                for row in msg.components:
+                    for component in row.children:
+                        if hasattr(component, "custom_id") and component.custom_id == "cookie_refresher_button":
+                            try:
+                                await msg.delete()
+                            except:
+                                pass
 
-    bot.add_view(CookieRefresherButton())
-    await refresher_thread.send(view=CookieRefresherButton())
-    print("CookieRefresher button posted.")
+        bot.add_view(CookieRefresherButton())
+        await refresher_thread.send(view=CookieRefresherButton())
+        print("CookieRefresher button posted.")
 
-except Exception as e:
-    print("Failed to post CookieRefresher button:", e)  
-    
+    except Exception as e:
+        print("Failed to post CookieRefresher button:", e)
+
     # ---------------- ALIVE STARTUP ----------------
     global alive_started
 
@@ -249,7 +247,6 @@ except Exception as e:
     await alive_start_task("heartbeat", alive_heartbeat_loop)
     await alive_start_task("status", alive_status_loop)
     await alive_start_task("daily_report", alive_daily_report_loop)
-
 # ---------------- SMART DM SYSTEM ----------------
 
 SMART_DM_LOG_CHANNEL_ID = 1550249366902800384
