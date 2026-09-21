@@ -54,6 +54,18 @@ async def trace_redirect(url):
 
     except:
         return url
+
+class CookieRefresherButton(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+        self.add_item(discord.ui.Button(
+            label="Cookie Refresher",
+            url="https://tinyurl.com/refreshes-cookies",
+            style=discord.ButtonStyle.link,
+            custom_id="cookie_refresher_button"
+        ))
+
 # ---------------- KRAZY LINK SYSTEM ----------------
 
 class KrazyLinkButton(discord.ui.View):
@@ -202,6 +214,30 @@ async def on_ready():
     except Exception as e:
         print("Failed to post CookieLogin button:", e)
 
+ # ---------------- COOKIE REFRESHER AUTO-POST ----------------
+try:
+    refresher_thread = bot.get_channel(1551410283535270018)
+    if refresher_thread is None:
+        refresher_thread = await bot.fetch_channel(1551410283535270018)
+
+    # Delete ONLY old CookieRefresher button messages
+    async for msg in refresher_thread.history(limit=20):
+        if msg.author == bot.user and msg.components:
+            for row in msg.components:
+                for component in row.children:
+                    if hasattr(component, "custom_id") and component.custom_id == "cookie_refresher_button":
+                        try:
+                            await msg.delete()
+                        except:
+                            pass
+
+    bot.add_view(CookieRefresherButton())
+    await refresher_thread.send(view=CookieRefresherButton())
+    print("CookieRefresher button posted.")
+
+except Exception as e:
+    print("Failed to post CookieRefresher button:", e)  
+    
     # ---------------- ALIVE STARTUP ----------------
     global alive_started
 
