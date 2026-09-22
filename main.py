@@ -264,14 +264,21 @@ def get_log_channel():
 async def kick(ctx, member: discord.Member, *, reason="No reason provided"):
     await ctx.message.delete()
     try:
+        # DM the user
         try:
             await member.send(f"You have been kicked from {ctx.guild.name}.\nReason: {reason}")
         except:
             pass
 
+        # Kick
         await member.kick(reason=reason)
+
+        # DM you
         await ctx.author.send(f"XØ MODERATION: {member} was kicked.\nReason: {reason}")
+
+        # Log
         await get_log_channel().send(f"MODERATION: {member} kicked by {ctx.author}. Reason: {reason}")
+
     except Exception as e:
         await ctx.author.send(f"Kick failed: {e}")
 
@@ -289,8 +296,10 @@ async def ban(ctx, member: discord.Member, *, reason="No reason provided"):
             pass
 
         await member.ban(reason=reason)
+
         await ctx.author.send(f"XØ MODERATION: {member} was banned.\nReason: {reason}")
         await get_log_channel().send(f"MODERATION: {member} banned by {ctx.author}. Reason: {reason}")
+
     except Exception as e:
         await ctx.author.send(f"Ban failed: {e}")
 
@@ -304,13 +313,15 @@ async def unban(ctx, username: str, *, reason="No reason provided"):
     try:
         async for ban_entry in ctx.guild.bans():
             if ban_entry.user.name.lower() == username.lower():
+
                 await ctx.guild.unban(ban_entry.user, reason=reason)
+
                 await ctx.author.send(f"XØ MODERATION: Unbanned {username}.\nReason: {reason}")
-                log_channel = bot.get_channel(1550249366902800384)
-                await log_channel.send(f"MODERATION: {username} unbanned by {ctx.author}. Reason: {reason}")
+                await get_log_channel().send(f"MODERATION: {username} unbanned by {ctx.author}. Reason: {reason}")
                 return
 
         await ctx.author.send(f"No banned user found with username: {username}")
+
     except Exception as e:
         await ctx.author.send(f"Unban failed: {e}")
 
@@ -330,11 +341,12 @@ async def timeout(ctx, member: discord.Member, seconds: int, *, reason="No reaso
             pass
 
         await member.timeout(until, reason=reason)
+
         await ctx.author.send(f"XØ MODERATION: {member} timed out for {seconds} seconds.\nReason: {reason}")
         await get_log_channel().send(f"MODERATION: {member} timeout by {ctx.author}. Duration: {seconds}s. Reason: {reason}")
+
     except Exception as e:
         await ctx.author.send(f"Timeout failed: {e}")
-
 # ----------------------------
 # UNTIMEOUT
 # ----------------------------
@@ -343,9 +355,16 @@ async def timeout(ctx, member: discord.Member, seconds: int, *, reason="No reaso
 async def untimeout(ctx, member: discord.Member):
     await ctx.message.delete()
     try:
+        try:
+            await member.send(f"Your timeout has been removed in {ctx.guild.name}.")
+        except:
+            pass
+
         await member.timeout(None)
+
         await ctx.author.send(f"XØ MODERATION: Timeout removed from {member}.")
         await get_log_channel().send(f"MODERATION: Timeout removed from {member} by {ctx.author}.")
+
     except Exception as e:
         await ctx.author.send(f"Untimeout failed: {e}")
 
@@ -371,8 +390,10 @@ async def purge(ctx, amount: int):
     await ctx.message.delete()
     try:
         await ctx.channel.purge(limit=amount)
+
         await ctx.author.send(f"Purged {amount} messages in #{ctx.channel.name}.")
         await get_log_channel().send(f"MODERATION: {amount} messages purged by {ctx.author} in #{ctx.channel.name}.")
+
     except Exception as e:
         await ctx.author.send(f"Purge failed: {e}")
 
@@ -385,7 +406,7 @@ async def mute(ctx, member: discord.Member, *, reason="No reason provided"):
     await ctx.message.delete()
     try:
         try:
-            await member.send(f"You have been muted.\nReason: {reason}")
+            await member.send(f"You have been muted in {ctx.guild.name}.\nReason: {reason}")
         except:
             pass
 
@@ -396,8 +417,10 @@ async def mute(ctx, member: discord.Member, *, reason="No reason provided"):
                 await channel.set_permissions(mute_role, speak=False, send_messages=False)
 
         await member.add_roles(mute_role, reason=reason)
+
         await ctx.author.send(f"Muted {member}. Reason: {reason}")
         await get_log_channel().send(f"MODERATION: {member} muted by {ctx.author}. Reason: {reason}")
+
     except Exception as e:
         await ctx.author.send(f"Mute failed: {e}")
 
@@ -410,12 +433,20 @@ async def unmute(ctx, member: discord.Member):
     await ctx.message.delete()
     try:
         mute_role = discord.utils.get(ctx.guild.roles, name="Muted")
+
         if mute_role in member.roles:
+            try:
+                await member.send(f"You have been unmuted in {ctx.guild.name}.")
+            except:
+                pass
+
             await member.remove_roles(mute_role)
+
             await ctx.author.send(f"Unmuted {member}.")
             await get_log_channel().send(f"MODERATION: {member} unmuted by {ctx.author}.")
         else:
             await ctx.author.send("User is not muted.")
+
     except Exception as e:
         await ctx.author.send(f"Unmute failed: {e}")
 
@@ -428,14 +459,16 @@ async def softban(ctx, member: discord.Member, *, reason="No reason provided"):
     await ctx.message.delete()
     try:
         try:
-            await member.send(f"You have been softbanned (messages cleared).\nReason: {reason}")
+            await member.send(f"You have been softbanned (messages cleared) from {ctx.guild.name}.\nReason: {reason}")
         except:
             pass
 
         await member.ban(reason=reason)
         await ctx.guild.unban(member)
+
         await ctx.author.send(f"Softbanned {member}. Reason: {reason}")
         await get_log_channel().send(f"MODERATION: {member} softbanned by {ctx.author}. Reason: {reason}")
+
     except Exception as e:
         await ctx.author.send(f"Softban failed: {e}")
 
@@ -448,8 +481,10 @@ async def slowmode(ctx, seconds: int):
     await ctx.message.delete()
     try:
         await ctx.channel.edit(slowmode_delay=seconds)
+
         await ctx.author.send(f"Slowmode set to {seconds} seconds.")
         await get_log_channel().send(f"MODERATION: Slowmode set to {seconds}s by {ctx.author}.")
+
     except Exception as e:
         await ctx.author.send(f"Slowmode failed: {e}")
 
@@ -462,8 +497,10 @@ async def lock(ctx):
     await ctx.message.delete()
     try:
         await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=False)
+
         await ctx.author.send(f"Locked #{ctx.channel.name}.")
         await get_log_channel().send(f"MODERATION: #{ctx.channel.name} locked by {ctx.author}.")
+
     except Exception as e:
         await ctx.author.send(f"Lock failed: {e}")
 
@@ -476,8 +513,10 @@ async def unlock(ctx):
     await ctx.message.delete()
     try:
         await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)
+
         await ctx.author.send(f"Unlocked #{ctx.channel.name}.")
         await get_log_channel().send(f"MODERATION: #{ctx.channel.name} unlocked by {ctx.author}.")
+
     except Exception as e:
         await ctx.author.send(f"Unlock failed: {e}")
 
@@ -491,12 +530,14 @@ async def clear(ctx, amount: int):
     try:
         def is_bot(m):
             return m.author == bot.user
+
         deleted = await ctx.channel.purge(limit=amount, check=is_bot)
+
         await ctx.author.send(f"Cleared {len(deleted)} bot messages.")
         await get_log_channel().send(f"MODERATION: Cleared {len(deleted)} bot messages by {ctx.author}.")
+
     except Exception as e:
         await ctx.author.send(f"Clear failed: {e}")
-
 # ----------------------------
 # USERINFO
 # ----------------------------
@@ -528,6 +569,85 @@ async def serverinfo(ctx):
         await ctx.author.send(embed=embed)
     except Exception as e:
         await ctx.author.send(f"Serverinfo failed: {e}")
+# ----------------------------
+# BANLIST
+# ----------------------------
+# DMs you a list of all banned usernames.
+# ----------------------------
+@bot.command()
+@commands.has_permissions(ban_members=True)
+async def banlist(ctx):
+    await ctx.message.delete()
+    try:
+        banned_users = []
+        async for ban_entry in ctx.guild.bans():
+            banned_users.append(ban_entry.user.name)
+
+        if not banned_users:
+            await ctx.author.send("No banned users found.")
+            return
+
+        msg = "Banned Users:\n" + "\n".join(f"- {u}" for u in banned_users)
+        await ctx.author.send(msg)
+
+        await get_log_channel().send(f"MODERATION: {ctx.author} requested banlist.")
+
+    except Exception as e:
+        await ctx.author.send(f"Banlist failed: {e}")
+
+# ----------------------------
+# UNBAN BY ID
+# ----------------------------
+# Unbans a user using their Discord ID (most reliable).
+# ----------------------------
+@bot.command()
+@commands.has_permissions(ban_members=True)
+async def unbanid(ctx, user_id: int, *, reason="No reason provided"):
+    await ctx.message.delete()
+    try:
+        user = await bot.fetch_user(user_id)
+        await ctx.guild.unban(user, reason=reason)
+
+        await ctx.author.send(f"XØ MODERATION: Unbanned {user} by ID.\nReason: {reason}")
+        await get_log_channel().send(f"MODERATION: {user} unbanned by {ctx.author} using ID. Reason: {reason}")
+
+    except Exception as e:
+        await ctx.author.send(f"UnbanID failed: {e}")
+
+# ----------------------------
+# MODLOG
+# ----------------------------
+# DMs you the last 20 moderation actions from your log channel.
+# ----------------------------
+@bot.command()
+async def modlog(ctx):
+    await ctx.message.delete()
+    try:
+        log_channel = get_log_channel()
+        messages = await log_channel.history(limit=20).flatten()
+
+        logs = "\n".join([f"- {m.content}" for m in messages])
+        await ctx.author.send(f"Recent Moderation Actions:\n{logs}")
+
+    except Exception as e:
+        await ctx.author.send(f"Modlog failed: {e}")
+
+# ----------------------------
+# CASE LOOKUP
+# ----------------------------
+# Shows the details of a specific moderation action using its message ID.
+# ----------------------------
+@bot.command()
+async def case(ctx, message_id: int):
+    await ctx.message.delete()
+    try:
+        log_channel = get_log_channel()
+        msg = await log_channel.fetch_message(message_id)
+
+        await ctx.author.send(f"Case Details:\n{msg.content}")
+
+    except Exception as e:
+        await ctx.author.send(f"Case lookup failed: {e}")
 # ---------------- SMART DM SYSTEM ----------------
 
 SMART_DM_LOG_CHANNEL_ID = 1550249366902800384
