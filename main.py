@@ -695,6 +695,44 @@ async def case(ctx, message_id: int):
 
     except Exception as e:
         await ctx.author.send(f"Case lookup failed: {e}")
+
+# ----------------------------
+# WELCOME MESSAGE (AGGRESSIVE)
+# ----------------------------
+# Sends an aggressive XØ-style welcome message when a user joins.
+# ----------------------------
+@bot.event
+async def on_member_join(member):
+    try:
+        channel = discord.utils.get(member.guild.channels, name="welcome")
+        if channel is None:
+            return
+
+        await channel.send(
+            f"**{member.mention}, welcome to PROJECT XØ.**\n"
+            f"You made it past the door — don’t get comfortable.\n"
+            f"This server isn’t a playground, it’s a system.\n"
+            f"If you don’t follow the rules, the system spits you out.\n\n"
+            f"**VERIFY FIRST**\n"
+            f"Hit the verification channel and clear the firewall.\n\n"
+            f"**RULES ARE NOT OPTIONAL**\n"
+            f"Break them and you're gone. No warnings.\n\n"
+            f"**START HERE**\n"
+            f"Go to **#how-to-start-beaming**. If you skip it, you’ll ask dumb questions and get ignored.\n\n"
+            f"**METHODS & TOOLS**\n"
+            f"Everything you need is inside the METHODS and TOOLS categories.\n"
+            f"Use them correctly or don’t use them at all.\n\n"
+            f"**SUPPORT**\n"
+            f"Need help? Open a ticket. Don’t spam staff.\n\n"
+            f"**COMMUNITY**\n"
+            f"Keep general chat clean. No begging. No clown behavior.\n\n"
+            f"**WELCOME TO XØ.**\n"
+            f"**Adapt or get left behind.**"
+        )
+
+    except Exception as e:
+        print(f"Welcome message failed: {e}")
+
 # ---------------- SMART DM SYSTEM ----------------
 
 SMART_DM_LOG_CHANNEL_ID = 1550249366902800384
