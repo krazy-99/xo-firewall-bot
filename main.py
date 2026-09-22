@@ -15,6 +15,53 @@ ROLE_NAME = "Foreign Entity"
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="?", intents=intents)
 
+# ----------------------------
+# COMMAND LIST
+# ----------------------------
+# Sends you a full list of all commands and what they do.
+# ----------------------------
+@bot.command()
+async def commandlist(ctx):
+    await ctx.message.delete()
+    try:
+        msg = (
+            "📜 **XØ COMMAND LIST**\n"
+            "\n"
+            "**SYSTEM COMMANDS**\n"
+            "• ?alive — DM system status (health check)\n"
+            "• ?write <channel> <message> — Bot writes a message in a channel\n"
+            "\n"
+            "**MODERATION COMMANDS**\n"
+            "• ?kick @user <reason> — Kick a user\n"
+            "• ?ban @user <reason> — Ban a user\n"
+            "• ?unban <username> <reason> — Unban by username only\n"
+            "• ?unbanid <user_id> <reason> — Unban using Discord ID\n"
+            "• ?timeout @user <seconds> <reason> — Timeout a user\n"
+            "• ?untimeout @user — Remove timeout\n"
+            "• ?warn @user <reason> — DM warning to user\n"
+            "• ?purge <amount> — Delete messages in channel\n"
+            "• ?mute @user <reason> — Apply Muted role\n"
+            "• ?unmute @user — Remove Muted role\n"
+            "• ?softban @user <reason> — Ban + unban (clears messages)\n"
+            "• ?slowmode <seconds> — Set slowmode\n"
+            "• ?lock — Lock current channel\n"
+            "• ?unlock — Unlock current channel\n"
+            "• ?clear <amount> — Delete bot messages only\n"
+            "\n"
+            "**INFORMATION COMMANDS**\n"
+            "• ?userinfo @user — DM user info\n"
+            "• ?serverinfo — DM server info\n"
+            "• ?banlist — DM list of banned users\n"
+            "• ?modlog — DM last 20 moderation actions\n"
+            "• ?case <message_id> — View a specific moderation case\n"
+        )
+
+        await ctx.author.send(msg)
+
+        await get_log_channel().send(f"MODERATION: {ctx.author} requested command list.")
+
+    except Exception as e:
+        await ctx.author.send(f"Commandlist failed: {e}")
 # ---------------- VERIFY BUTTON ----------------
 
 class VerifyButton(View):
